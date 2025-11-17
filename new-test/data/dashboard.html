@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDS Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        header img {
+            height: 50px;
+        }
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-left: 1rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: #555;
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 1rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 1rem;
+            padding: 1rem;
+            width: 300px;
+        }
+        .card h3 {
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        .action-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .launch {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .stop {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
+        <nav>
+            <a href="#alerts">Alerts</a>
+            <a href="/list">Logs</a>
+        </nav>
+    </header>
+    <div class="dashboard">
+        <div class="card">
+            <h3>System Status</h3>
+            <p>Status: <span id="status">Offline</span></p>
+            <p>Uptime: <span id="uptime">0 hours</span></p>
+            <div style="margin-top: 15px;">
+                <button id="launchBtn" class="action-button launch" onclick="launchSystem()" style="display: inline-block;">Launch System</button>
+                <button id="stopBtn" class="action-button stop" onclick="stopSystem()" style="display: none;">Stop System</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Alerts Summary</h3>
+            <p>Total Alerts: <span id="total-alerts">0</span></p>
+            <p>Critical: <span id="critical-alerts">0</span></p>
+            <p>Warnings: <span id="warning-alerts">0</span></p>
+        </div>
+        <div class="card">
+            <h3>Alerts Over Time</h3>
+            <canvas id="alertsChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>Alert Severity Distribution</h3>
+            <canvas id="severityChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>Recent Logs</h3>
+            dashboard
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event</th>
+                        <th>Severity</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-table">
+                    <!-- Placeholder rows; in a real app, this would be populated dynamically -->
+                    <tr>
+                        <td>2023-10-01 12:00</td>
+                        <td>Unauthorized access attempt</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>2023-10-01 11:45</td>
+                        <td>Port scan detected</td>
+                        <td>Medium</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Traffic Overview</h3>
+            <p>Incoming Packets: <span id="incoming">1,234,567</span></p>
+            <p>Outgoing Packets: <span id="outgoing">987,654</span></p>
+            <p>Anomalies Detected: <span id="anomalies">5</span></p>
+        </div>
+        <div class="card">
+            <h3>Traffic Anomalies</h3>
+            <canvas id="trafficChart"></canvas>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dataCards = document.querySelectorAll('.card');
+        dataCards.forEach(card => {
+            card.style.display = 'none';
+        });
+
+        // Optionally show the "System Status" card
+        document.querySelector('.dashboard .card').style.display = 'block';
+    });
+
+    function updateDashboard() {
+        document.getElementById('total-alerts').textContent = Math.floor(Math.random() * 100);
+        document.getElementById('critical-alerts').textContent = Math.floor(Math.random() * 10);
+        document.getElementById('warning-alerts').textContent = Math.floor(Math.random() * 50);
+    }
+
+    setInterval(updateDashboard, 30000);
+
+    const alertsCtx = document.getElementById('alertsChart').getContext('2d');
+    const alertsChart = new Chart(alertsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Alerts',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    const severityCtx = document.getElementById('severityChart').getContext('2d');
+    const severityChart = new Chart(severityCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Low', 'Medium', 'High', 'Critical'],
+            datasets: [{
+                data: [10, 20, 30, 5],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+    const trafficChart = new Chart(trafficCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Anomalies',
+                data: [5, 10, 15, 8],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    function launchSystem() {
+        document.getElementById('status').textContent = 'Active';
+        document.getElementById('uptime').textContent = '24 hours';
+        document.getElementById('launchBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'inline-block';
+
+        const dataCards = document.querySelectorAll('.card');
+        dataCards.forEach(card => {
+            card.style.display = 'block';
+        });
+        
+        console.log('IDS System launched');
+    }
+
+    function stopSystem() {
+        document.getElementById('status').textContent = 'Offline';
+        document.getElementById('uptime').textContent = '0 hours';
+        document.getElementById('launchBtn').style.display = 'inline-block';
+        document.getElementById('stopBtn').style.display = 'none';
+
+        const dataCards = document.querySelectorAll('.card');
+        dataCards.forEach(card => {
+            card.style.display = 'none';
+        });
+
+        document.querySelector('.dashboard .card').style.display = 'block';
+
+        fetch('/stop', { method: 'POST' }).catch(err => console.log('Stop request failed:', err));
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Monitoring Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #007BFF;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Agent Monitoring Dashboard</h1>
+        <div class="status" id="agent-status">
+            Loading agent statuses...
+        </div>
+    </div>
+    <script>
+        async function fetchStatus() {
+            const response = await fetch('/status');
+            const data = await response.json();
+            let statusHtml = '';
+            for (const [agent, status] of Object.entries(data)) {
+                statusHtml += `<p>${agent}: ${status}</p>`;
+            }
+            document.getElementById('agent-status').innerHTML = statusHtml;
+        }
+        fetchStatus();
+        setInterval(fetchStatus, 5000);  // Refresh every 5 seconds
+    </script>
+</body>
+</html>
