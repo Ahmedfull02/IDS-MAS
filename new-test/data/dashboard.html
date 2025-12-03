@@ -49,7 +49,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin: 1rem;
             padding: 1rem;
-            width: 300px;
+            min-width: 300px;
+            width: auto;
         }
         .card h3 {
             margin-top: 0;
@@ -70,213 +71,271 @@
             max-width: 100%;
             height: auto;
         }
-        .action-button {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .launch {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .stop {
-            background-color: #f44336;
-            color: white;
-        }
     </style>
 </head>
 <body>
     <header>
-        <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
+        <a href="/dashboard">
+            <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
+        </a>
         <nav>
-            <a href="#alerts">Alerts</a>
+            <a href="/models">Models</a>
             <a href="/list">Logs</a>
         </nav>
     </header>
     <div class="dashboard">
         <div class="card">
+            {% set uptime = server_start_time %}
+            {% set elapsed = elapsed_time %}
             <h3>System Status</h3>
-            <p>Status: <span id="status">Offline</span></p>
-            <p>Uptime: <span id="uptime">0 hours</span></p>
-            <div style="margin-top: 15px;">
-                <button id="launchBtn" class="action-button launch" onclick="launchSystem()" style="display: inline-block;">Launch System</button>
-                <button id="stopBtn" class="action-button stop" onclick="stopSystem()" style="display: none;">Stop System</button>
-            </div>
+            <p>Status: <span id="status">Online</span></p>
+            <p>start time: <span id="start time">{{uptime}}</span></p>
+            <p>Uptime: <span id="Uptime"> {{elapsed}}</span></p>
+
         </div>
         <div class="card">
+            {% set total_alerts = results|length %}
+            {% set benign_alerts = results|selectattr("Label","equalto",'BENIGN')|list|length %}
+            {% set attack_alerts = results | selectattr("Label", "ne", "BENIGN") | list | length %}
             <h3>Alerts Summary</h3>
-            <p>Total Alerts: <span id="total-alerts">0</span></p>
-            <p>Critical: <span id="critical-alerts">0</span></p>
-            <p>Warnings: <span id="warning-alerts">0</span></p>
+            <p>Total Alerts: <span id="total-alerts">{{total_alerts}}</span></p>
+            <p>Benign: <span id="benign">{{benign_alerts}}</span></p>
+            <p>Attack: <span id="attack">{{attack_alerts}}</span></p>
         </div>
         <div class="card">
             <h3>Alerts Over Time</h3>
-            <canvas id="alertsChart"></canvas>
+            {%set attacks_time = attacks_per_time %}
+            {%set benign_attacks = attacks_per_time[0] %}
+            {%set real_attacks = attacks_per_time[1] %}
+            <input type="hidden" id="attTime" value='{{attacks_time|tojson}}'>
+            <input type="hidden" id="attTime0" value='{{benign_attacks|tojson}}'>
+            <input type="hidden" id="attTime1" value='{{real_attacks|tojson}}'>
+            <canvas id="alertsLineChart" width="600" height="400"></canvas>
         </div>
         <div class="card">
-            <h3>Alert Severity Distribution</h3>
-            <canvas id="severityChart"></canvas>
+            <h3>Attack Distribution</h3>
+            {%set attacks_dist = attacks %}
+            <input type="hidden" id="attTypes" value='{{attacks_dist|tojson}}'>
+            <canvas id="distributionChart">
+            </canvas>
         </div>
         <div class="card">
             <h3>Recent Logs</h3>
-            dashboard
             <table>
                 <thead>
                     <tr>
-                        <th>Time</th>
-                        <th>Event</th>
-                        <th>Severity</th>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>Source IP</th>
+                        <th>Destination IP</th>
+                        <th>Protocol</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="logs-table">
-                    <!-- Placeholder rows; in a real app, this would be populated dynamically -->
+                    {% for result in results[-3:] %}
                     <tr>
-                        <td>2023-10-01 12:00</td>
-                        <td>Unauthorized access attempt</td>
-                        <td>High</td>
+                        <!-- Data will be dynamically populated -->
+                        <td>{{ result['id'] }}</td>
+                        <td>{{ result['Timestamp'] }}</td>
+                        <td>{{ result['Src IP'] }}</td>
+                        <td>{{ result['Dst IP'] }}</td>
+                        <td>{{ result['Protocol'] }}</td>
+                        <td>{{ result['Label'] }}</td>
                     </tr>
-                    <tr>
-                        <td>2023-10-01 11:45</td>
-                        <td>Port scan detected</td>
-                        <td>Medium</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
         <div class="card">
-            <h3>Traffic Overview</h3>
-            <p>Incoming Packets: <span id="incoming">1,234,567</span></p>
-            <p>Outgoing Packets: <span id="outgoing">987,654</span></p>
-            <p>Anomalies Detected: <span id="anomalies">5</span></p>
-        </div>
-        <div class="card">
-            <h3>Traffic Anomalies</h3>
-            <canvas id="trafficChart"></canvas>
+            {% set p = protocol_usage%}
+            {%set p0 = protocol_usage[0] %}
+            {%set p1 = protocol_usage[1] %}
+            <h3>Protocol Usage</h3>
+            <input type="hidden" id="protoUsage0" value='{{p0|tojson}}'>
+            <input type="hidden" id="protoUsage1" value='{{p1|tojson}}'>
+            <canvas id="protocolUsageChart">
+            </canvas>
         </div>
     </div>
     <script>
+    // Show all cards by default
     document.addEventListener('DOMContentLoaded', () => {
-        const dataCards = document.querySelectorAll('.card');
-        dataCards.forEach(card => {
-            card.style.display = 'none';
-        });
-
-        // Optionally show the "System Status" card
-        document.querySelector('.dashboard .card').style.display = 'block';
-    });
-
-    function updateDashboard() {
-        document.getElementById('total-alerts').textContent = Math.floor(Math.random() * 100);
-        document.getElementById('critical-alerts').textContent = Math.floor(Math.random() * 10);
-        document.getElementById('warning-alerts').textContent = Math.floor(Math.random() * 50);
-    }
-
-    setInterval(updateDashboard, 30000);
-
-    const alertsCtx = document.getElementById('alertsChart').getContext('2d');
-    const alertsChart = new Chart(alertsCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Alerts',
-                data: [12, 19, 3, 5, 2, 3],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    const severityCtx = document.getElementById('severityChart').getContext('2d');
-    const severityChart = new Chart(severityCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Low', 'Medium', 'High', 'Critical'],
-            datasets: [{
-                data: [10, 20, 30, 5],
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(153, 102, 255, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-
-    const trafficCtx = document.getElementById('trafficChart').getContext('2d');
-    const trafficChart = new Chart(trafficCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            datasets: [{
-                label: 'Anomalies',
-                data: [5, 10, 15, 8],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    function launchSystem() {
-        document.getElementById('status').textContent = 'Active';
-        document.getElementById('uptime').textContent = '24 hours';
-        document.getElementById('launchBtn').style.display = 'none';
-        document.getElementById('stopBtn').style.display = 'inline-block';
-
         const dataCards = document.querySelectorAll('.card');
         dataCards.forEach(card => {
             card.style.display = 'block';
         });
-        
-        console.log('IDS System launched');
-    }
+    });
 
-    function stopSystem() {
-        document.getElementById('status').textContent = 'Offline';
-        document.getElementById('uptime').textContent = '0 hours';
-        document.getElementById('launchBtn').style.display = 'inline-block';
-        document.getElementById('stopBtn').style.display = 'none';
+    // Pie chart
+    // Color map 
+    colorMap = {
+    'BENIGN':       '#58d68d',
+    'Botnet':       '#5dade2',
+    'DDoS':         '#ec7063',
+    'DoS':          '#f7dc6f',
+    'FTP-Patator':  '#a569bd',
+    'Heartbleed':   '#5d6d7e',
+    'Infiltration': '#5499c7',
+    'Port Scanning':'#af7ac5',
+    'SSH-Patator':  '#48c9b0',
+    'Web Attacks':  '#f4d03f'
+}
+    // Load and parse the count dictionary
+    rawData = document.getElementById('attTypes').value;
+    rawTimeData = document.getElementById('attTime').value;
 
-        const dataCards = document.querySelectorAll('.card');
-        dataCards.forEach(card => {
-            card.style.display = 'none';
+    console.log(rawData)
+    attTypes = JSON.parse(rawData);
+    console.log(attTypes)
+    attTime = JSON.parse(rawTimeData);
+    console.log(attTime)
+    
+
+    // Only visualize non-zero entries (optional)
+    const pieLabels = [];
+    const pieData = [];
+    const pieBgColors = [];
+    Object.entries(attTypes).forEach(([k, v]) => {
+        if (v > 0) {
+            pieLabels.push(k);
+            pieData.push(v);
+            pieBgColors.push(colorMap[k]);
+
+        }
+    });
+
+    console.log("Labels are :", pieLabels)
+
+    // If all are zero, show at least the full chart
+    if (pieLabels.length === 0) {
+        Object.entries(attTypes).forEach(([k, v]) => {
+            pieLabels.push(k);
+            pieData.push(v);
+            pieBgColors.push(colorMap[k]);
         });
-
-        document.querySelector('.dashboard .card').style.display = 'block';
-
-        fetch('/stop', { method: 'POST' }).catch(err => console.log('Stop request failed:', err));
     }
-</script>
+    
+    const pieCtx = document.getElementById('distributionChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: pieBgColors
+
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+
+    // Alerts over time
+    const timeData0 = JSON.parse(document.getElementById('attTime0').value);
+    const timeData1 = JSON.parse(document.getElementById('attTime1').value);
+
+    // Combine all unique times, sort for nice X axis
+    const allTimes = Array.from(new Set([
+    ...Object.keys(timeData0),
+    ...Object.keys(timeData1)
+    ])).sort();
+
+    // Build values for both series, fill with 0 if missing
+    const values0 = allTimes.map(t => timeData0[t] !== undefined ? timeData0[t] : 0);
+    const values1 = allTimes.map(t => timeData1[t] !== undefined ? timeData1[t] : 0);
+
+    console.log(allTimes)
+    const lineCtx = document.getElementById('alertsLineChart').getContext('2d');
+    new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: allTimes,
+        datasets: [
+            {
+                label: 'Benign',
+                data: values0,
+                borderColor: '#5dade2',
+                borderDash: [5,5]
+
+            },
+            {
+                label: 'Attack',
+                data: values1,
+                borderColor: '#ec7063',
+                pointRadius: 4,                      // make attacks a big dot
+                pointBackgroundColor: '#ec7063',
+                pointBorderColor: '#ec7063',
+                showLine: false
+            }
+        ]
+    },
+    options: {
+            responsive: true,
+            plugins: {
+              legend: { display: true }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Date/Time' }
+                },
+                y: {
+                    title: { display: true, text: 'Alert Count' },
+                    beginAtZero: true
+                }
+            }
+        }
+});
+
+    
+    const protoUsage0 = JSON.parse(document.getElementById('protoUsage0').value);
+    const protoUsage1 = JSON.parse(document.getElementById('protoUsage1').value);
+
+    console.log('\n\n\nBenign:', protoUsage0, '\nAttack:', protoUsage1, '\n\n\n');
+
+    /* Get all p^rotocols used*/
+    const allProtoUsage = Array.from(new Set([
+    ...Object.keys(protoUsage0),
+    ...Object.keys(protoUsage1)
+    ])).sort();
+
+    const protocolsCtx = document.getElementById('protocolUsageChart').getContext('2d');
+    const protocolsChart = new Chart(protocolsCtx, {
+        type: 'bar',
+        data: {
+            labels: allProtoUsage,
+            datasets: [
+                {
+                    label: 'Benign',
+                    data: protoUsage0,
+                    backgroundColor: '#5dade2'
+                },
+                {
+                    label: 'Attack',
+                    data: protoUsage1,
+                    backgroundColor: '#ec7063'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Protocol' }},
+                y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+            }
+        }
+    });    
+
+    setTimeout(function() {
+        window.location.reload();
+    }, 5000); // 5 Secondes
+    </script>
 </body>
 </html>

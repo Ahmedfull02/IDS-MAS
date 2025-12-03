@@ -13,13 +13,14 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
 
 
-MODEL_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\model.pkl"
-ENCODER_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\encoder_y.pkl"
-METRICS_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\metric_results.json"
-IMPORTANCE8PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\importance_df.json"
-ACCLOSS_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\.txt"
+MODEL_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\xgb\\model.pkl"
+ENCODER_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\xgb\\encoder_y.pkl" 
+METRICS_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\xgb\\metric_results.json"
+IMPORTANCE_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\xgb\\importance_df.json"
 
-class TabAnalyzerAgent(Agent):
+AGENT6 = "agent6@localhost"
+
+class XGBAnalyzerAgent(Agent):
     class AnalyzeBehaviour(CyclicBehaviour):
         def __init__(self, model_path, y_encoder_path):
             super().__init__()
@@ -65,11 +66,10 @@ class TabAnalyzerAgent(Agent):
                 prediction = self.analyze(y_encoder=y_encoder, prediction=prediction)
 
                 # Send data to dashboard agent 
-                new_msg = Message(to="agent4@localhost")
-                data_processed.update({"Label": prediction})
-                
-                new_msg.body = json.dumps(data_processed)
-                await self.send(new_msg)              
+                new_msg = Message(to=AGENT6)
+                                
+                new_msg.body = {"XGBPred": prediction}
+                await self.send(new_msg)
 
         def importFile(self, model_path):
             with open(model_path, "rb") as file:

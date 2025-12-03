@@ -32,7 +32,7 @@
         }
         body {
             font-family: Arial, sans-serif;
-            /*margin: 20px;*/
+            
         }
         table {
             width: 100%;
@@ -66,16 +66,16 @@
         }
     </style>
 </head>
-<body>   
-    <header>
+<header>
         <a href="/dashboard">
-                <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
-            </a>
+            <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
+        </a>
         <nav>
-            <a href="#alerts">Alerts</a>
+            <a href="/models">Models</a>
             <a href="/list">Logs</a>
         </nav>
     </header>
+<body>   
     <h1 align="center">List of traffic</h1>
     <div class="search-bar">
         <input type="text" id="search" class="search-input" onkeyup="filterTable()" placeholder="Search for data...">
@@ -96,7 +96,7 @@
         </thead>
         <tbody>
             {% for result in results %}
-            <tr class="{{ 'benign' if result.status == 'benign' else 'non-benign' }}">
+            <tr class="{{ 'benign' if result['Label'] == 'BENIGN' else 'non-benign' }}">
                 <td>{{ loop.index }}</td>
                 <td>{{ result['Timestamp'] }}</td>
                 <td>{{ result['Flow ID'] }}</td>
@@ -105,7 +105,7 @@
                 <td>{{ result['Dst IP'] }}</td>
                 <td>{{ result['Dst Port'] }}</td>
                 <td>{{ result['Protocol'] }}</td>
-                <td>{{ result.status }}</td>
+                <td>{{ result['Label'] }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -183,6 +183,9 @@
             }
         }
     }
+    setTimeout(function() {
+        window.location.reload();
+    }, 20000); // 5 Secondes
     </script>
 </body>
 </html>
