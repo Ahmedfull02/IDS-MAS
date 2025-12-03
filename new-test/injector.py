@@ -7,6 +7,7 @@ import functions_to_use as f
 from spade.template import Template
 import random
 
+AGENT2 = "agent2@localhost"
 
 class InjectorAgent(Agent):
     class InjectBehaviour(PeriodicBehaviour):
@@ -20,7 +21,7 @@ class InjectorAgent(Agent):
         async def run(self):
             if self.index < len(self.data): # len(self.data)
                 row = f.read_data_row(self.data, self.index)
-                msg = Message(to="agent2@localhost")
+                msg = Message(to=AGENT2)
                 msg.set_metadata("performative", "inform")
                 row.update({'id':self.index})
                 msg.body = row.to_json()
@@ -33,6 +34,6 @@ class InjectorAgent(Agent):
                 self.kill()
 
     async def setup(self):
-        b = self.InjectBehaviour("data/Friday.csv", period=10)
+        b = self.InjectBehaviour("data/Friday.csv", period=5)
         self.add_behaviour(b)  # Inject every 1 second
         print(f"\n\n\nInjectorAgent {self.jid} started\n\n\n")

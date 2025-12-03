@@ -6,7 +6,13 @@ from spade.message import Message
 import json
 import datetime
 from datetime import timedelta
+import asyncio
 
+AGENT2 = "agent2@localhost" # Preprocesor
+AGENT3 = "agent3@localhost" # Tabnet
+AGENT4 = "agent4@localhost" # RandomForest
+AGENT5 = "agent5@localhost" # XGBoost
+AGENT6 = "agent6@localhost" # Dashboard
 
 class DashboardAgent(Agent):
     results = []
@@ -22,20 +28,51 @@ class DashboardAgent(Agent):
     MODELS = []
     class DashboardBehaviour(CyclicBehaviour):
         async def run(self):
-            msg = await self.receive(timeout=5)
-            if msg:
-                data = json.loads(msg.body) if msg.body is not None else {}
-                print(data, "In dashboard")
-                self.agent.add_result(data)
+            msg = await self.receive(timeout=4)
+            if msg and msg.body:
+                try:
+                    # 1. Parse incoming data
+                    data_chunk = json.loads(msg.body)
+                    
+                    # 2. Merge into current row
+                    # e.g., Merges {"RFPred": "Benign"} into existing data
+                    self.agent.current_row.update(data_chunk)
+                    
+                    print(f"\n[Dashboard] Received update. Current keys: {list(self.agent.current_row.keys())}")
+
+                    # 3. Check if we have results from ALL 3 models
+                    # We look for specific keys. Adjust these strings if your other agents send different keys.
+                    required_keys = ["RFPred", "XGBPred", "TABPred"]
+                    
+                    # Check if all required keys exist in the current_row
+                    if all(key in self.agent.current_row for key in required_keys):
+                        
+                        await self.process_complete_row(self.agent.current_row)
+                        
+                        # 4. Clear buffer for the next traffic packet
+                        self.agent.current_row = {}
+
+                except Exception as e:
+                    print(f"[Dashboard] Error processing message: {e}")
+
+
+
 ########################################################################################
 ####                                                                                ####    
 ####                         Dashboard variables                                    ####
 ####                                                                                ####
 ########################################################################################
                 # ATTACKS types
-                attack = data['Label']
-                counter = self.agent.ATT_TYPES[attack]+1
-                self.agent.ATT_TYPES[attack] = counter
+                predictions = [
+                        self.process_complete_row.get("TABPred"),
+                        self.process_complete_row.get("rfPred"),
+                        self.process_complete_row.get("XGBPred")
+                    ]
+                if "BENIGN" not in predictions:
+                    final_label = "Attack"
+
+                counter = self.agent.ATT_TYPES[final_label]+1
+                self.agent.ATT_TYPES[final_label] = counter
                 
                 # ATTACKS Over Time
                 time_attack = data['Timestamp']
@@ -46,9 +83,9 @@ class DashboardAgent(Agent):
                 time_attack = datetime.datetime.strftime(time_attack,"%H:%M")
                 
                 print(f'\n\n\nATTACK time: {time_attack}\n\n\n')
-                print(f'\n\n\nATTACK TYPE: {attack}\n\n\n')
+                print(f'\n\n\nATTACK TYPE: {final_label}\n\n\n')
                  
-                if attack == 'BENIGN':
+                if final_label == 'BENIGN':
                     if time_attack in self.agent.ATT_OVER_TIME[0]:
                         self.agent.ATT_OVER_TIME[0][time_attack] += 1
                     else:
@@ -60,8 +97,8 @@ class DashboardAgent(Agent):
                         self.agent.ATT_OVER_TIME[1][time_attack] = 1
                         
                 # Protocole Usage
-                protocol = data['Protocol']
-                if attack == 'BENIGN':
+                protocol = self.process_complete_row['Protocol']
+                if final_label == 'BENIGN':
                     if protocol in self.agent.PROTOCOL_USAGE[0]:
                         self.agent.PROTOCOL_USAGE[0][protocol] += 1
                     else:
@@ -73,7 +110,7 @@ class DashboardAgent(Agent):
                         self.agent.PROTOCOL_USAGE[1][protocol] = 1
                         
                 print(f'\n\n\Protocole usage: {self.agent.PROTOCOL_USAGE}\n\n\n')
-                
+                self.agent.buffer = {}
 ########################################################################################
 ####                                                                                ####    
 ####                         Models info data                                       ####
@@ -139,6 +176,9 @@ class DashboardAgent(Agent):
                 # print(self.agent.MODELS)
                 
     async def setup(self):
+        # Spade interface        
+        # self.web.start(hostname="127.0.0.1", port="10000")
+       
         self.web.add_get("/dashboard",self.handle_request,template="new-test/data/dashboard.html",)
         self.web.start(port=10001, templates_path="data")
 

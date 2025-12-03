@@ -19,6 +19,8 @@ METRICS_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-t
 IMPORTANCE8PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\importance_df.json"
 ACCLOSS_PATH = "C:\\Users\\YOGA\\Desktop\\master s4 PFE\\project\\IDS-MAS\\new-test\\model\\tabnet\\.txt"
 
+AGENT6 = "agent6@localhost"
+
 class TabAnalyzerAgent(Agent):
     class AnalyzeBehaviour(CyclicBehaviour):
         def __init__(self, model_path, y_encoder_path):
@@ -35,8 +37,8 @@ class TabAnalyzerAgent(Agent):
                     print("Received message with no body.")
                     return
 
-                print("\n\n\n\n\n\n")
-                print("In Analyzer Agent")
+                # print("\n\n\n\n\n\n")
+                # print("In Analyzer Agent")
                 # Model prediction
                 data_processed = data.get("0")
                 encoded_data = data.get("1")
@@ -65,9 +67,9 @@ class TabAnalyzerAgent(Agent):
                 prediction = self.analyze(y_encoder=y_encoder, prediction=prediction)
 
                 # Send data to dashboard agent 
-                new_msg = Message(to="agent4@localhost")
-                data_processed.update({"Label": prediction})
-                
+                new_msg = Message(to=AGENT6)
+                print(f"\n\n\n Model Tab \n\n\n")
+                data_processed.update({"TABPred": prediction})
                 new_msg.body = json.dumps(data_processed)
                 await self.send(new_msg)              
 

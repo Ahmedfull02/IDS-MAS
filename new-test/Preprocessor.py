@@ -13,6 +13,10 @@ from spade.template import Template
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger(__name__)
 
+AGENT3 = "agent3@localhost"
+AGENT4 = "agent4@localhost"
+AGENT5 = "agent5@localhost"
+AGENT6 = "agent6@localhost"
 
 class PreprocessorAgent(Agent):
     class ProcessBehaviour(CyclicBehaviour):
@@ -48,10 +52,27 @@ class PreprocessorAgent(Agent):
                 data_json.update({"Timestamp": time})
                 # Prepare data to send to Analyzer agent
                 data = json.dumps({0: data_json, 1: encoded_data})
-                # Send data to Analyzer
-                new_msg = Message(to="agent3@localhost")
+                
+                # Send data to Dashboard
+                # new_msg = Message(to=AGENT6)
+                # new_msg.body = data
+                
+                # Send data to Analyzer1
+                new_msg = Message(to=AGENT3)
                 new_msg.body = data
-                # print(new_msg.body, 'In preprocessor')
+                
+                await self.send(new_msg)
+                
+                # Send data to Analyzer2
+                new_msg = Message(to=AGENT4)
+                new_msg.body = data
+                
+                await self.send(new_msg)
+                
+                # Send data to Analyzer1
+                new_msg = Message(to=AGENT5)
+                new_msg.body = data
+                
                 await self.send(new_msg)
 
         def cleanAgent(self, data, cols_file):

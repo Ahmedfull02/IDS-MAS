@@ -26,7 +26,7 @@ class RFAnalyzerAgent(Agent):
             super().__init__()
             self.model_path = model_path
             self.y_encoder_path = y_encoder_path
-
+        
         async def run(self):
             msg = await self.receive()
             if msg:
@@ -36,8 +36,8 @@ class RFAnalyzerAgent(Agent):
                     print("Received message with no body.")
                     return
 
-                print("\n\n\n\n\n\n")
-                print("In Analyzer Agent")
+                # print("\n\n\n\n\n\n")
+                # print("In Analyzer Agent")
                 # Model prediction
                 data_processed = data.get("0")
                 encoded_data = data.get("1")
@@ -67,8 +67,10 @@ class RFAnalyzerAgent(Agent):
 
                 # Send data to dashboard agent 
                 new_msg = Message(to=AGENT6)
+                print(f"\n\n\n Model RF \n\n\n")
                
-                new_msg.body = {"RFPred": prediction}
+                data_processed.update({"RFPred": prediction})
+                new_msg.body = json.dumps(data_processed)
                 await self.send(new_msg)              
 
         def importFile(self, model_path):

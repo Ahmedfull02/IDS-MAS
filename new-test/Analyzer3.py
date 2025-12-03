@@ -36,8 +36,8 @@ class XGBAnalyzerAgent(Agent):
                     print("Received message with no body.")
                     return
 
-                print("\n\n\n\n\n\n")
-                print("In Analyzer Agent")
+                # print("\n\n\n\n\n\n")
+                # print("In Analyzer Agent")
                 # Model prediction
                 data_processed = data.get("0")
                 encoded_data = data.get("1")
@@ -67,8 +67,9 @@ class XGBAnalyzerAgent(Agent):
 
                 # Send data to dashboard agent 
                 new_msg = Message(to=AGENT6)
-                                
-                new_msg.body = {"XGBPred": prediction}
+                print(f"\n\n\n Model XGB \n\n\n")               
+                data_processed.update({"XGBPred": prediction})
+                new_msg.body = json.dumps(data_processed)
                 await self.send(new_msg)
 
         def importFile(self, model_path):
