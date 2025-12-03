@@ -129,19 +129,18 @@
                         <th>Source IP</th>
                         <th>Destination IP</th>
                         <th>Protocol</th>
-                        <th>Status</th>
+                        <th>Label</th>
                     </tr>
                 </thead>
                 <tbody id="logs-table">
-                    {% for result in results[-3:] %}
+                    {% for result in results[-5:] %}
                     <tr>
-                        <!-- Data will be dynamically populated -->
-                        <td>{{ result['id'] }}</td>
-                        <td>{{ result['Timestamp'] }}</td>
-                        <td>{{ result['Src IP'] }}</td>
-                        <td>{{ result['Dst IP'] }}</td>
-                        <td>{{ result['Protocol'] }}</td>
-                        <!-- <td>{{ result['Label'] }}</td> -->
+                        <td>{{ result.get('id', 0)|int }}</td>
+                        <td>{{ result.get('Timestamp', 'N/A') }}</td>
+                        <td>{{ result.get('Src IP', 'N/A') }}</td>
+                        <td>{{ result.get('Dst IP', 'N/A') }}</td>
+                        <td>{{ result.get('Protocol', 'N/A') }}</td>
+                        <td>{{ result.get('Label', 'N/A') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

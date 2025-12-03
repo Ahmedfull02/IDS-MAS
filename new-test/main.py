@@ -14,6 +14,7 @@ AGENT3 = ["agent3@localhost", "3"]
 AGENT4 = ["agent4@localhost", "4"]
 AGENT5 = ["agent5@localhost", "5"]
 AGENT6 = ["agent6@localhost", "6"]
+AGENT7 = ["agent7@localhost", "7"]
 
 async def main():
 
@@ -26,13 +27,15 @@ async def main():
     analyzer2 = RFAnalyzerAgent(AGENT4[0],AGENT4[1])
     analyzer3 = XGBAnalyzerAgent(AGENT5[0],AGENT5[1])
     collector = CollectorAgent(AGENT6[0],AGENT6[1])
-
+    dashboard = DashboardAgent(AGENT7[0],AGENT7[1])
+    
     await injector.start(auto_register=True)
     await preprocessor.start(auto_register=True)
     await analyzer1.start(auto_register=True)
     await analyzer2.start(auto_register=True)
-    # await analyzer3.start(auto_register=True)
+    await analyzer3.start(auto_register=True)
     await collector.start(auto_register=True)
+    await dashboard.start(auto_register=True)
     print("Agents are running")
 
     await asyncio.sleep(1000)  # Keep the agents running for a while

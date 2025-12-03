@@ -246,6 +246,7 @@
             align-items: center;
             justify-content: center;
             color: #7686a0;
+            font-size: 1.1rem;
         }
 
         .expand-indicator {
@@ -275,6 +276,11 @@
             max-width: 100%;
             height: auto !important;
         }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
@@ -289,255 +295,153 @@
         </nav>
     </header>
 
-    <div class="models-container"></div>
-
-    <script>
-
-        const modelsData = [
-            {
-                id: 'rf',
-                name: 'Random Forest',
-                type: 'Ensemble Learning',
-                status: 'Trained',
-                description: 'Random Forest is an ensemble learning method that operates by constructing multiple decision trees during training and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees. It\'s highly effective for network intrusion detection due to its ability to handle high-dimensional data and resistance to overfitting.',
-                metrics: {
-                    accuracy: '0',
-                    balancedAccuracy: '0',
-                    precision: '0',
-                    recall: '0',
-                    f1Score: '0',
-                    auc: '0'
-                },
-                images: {
-                    confusionMatrix: "../model/RF/cm.png",
-                    rocCurve: '../model/RF/roc.png',
-                    accLoss: null
-                }
-            },
-            {
-                id: 'xgb',
-                name: 'XGBoost',
-                type: 'Gradient Boosting',
-                status: 'Trained',
-                description: 'XGBoost (eXtreme Gradient Boosting) is an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable. It implements machine learning algorithms under the Gradient Boosting framework, providing a parallel tree boosting that solves many data science problems in a fast and accurate way. It\'s particularly effective for structured/tabular data and has become a go-to method for winning machine learning competitions.',
-                metrics: {
-                    accuracy: '99.97',
-                    balancedAccuracy: '95.12',
-                    precision: '99.96',
-                    recall: '99.97',
-                    f1Score: '99.97',
-                    auc: '0.9999'
-                },
-                images: {
-                    confusionMatrix: '../model/xgb/cm.png',
-                    rocCurve: null,
-                    accLoss: null
-                }
-            },
-            {
-                id: 'tabnet',
-                name: 'TabNet',
-                type: 'Deep Learning',
-                status: 'Trained',
-                description: 'TabNet is a novel deep learning architecture specifically designed for tabular data. It uses sequential attention to choose which features to reason from at each decision step, enabling interpretability and more efficient learning. TabNet outperforms or matches other models on various datasets while providing interpretable feature attributions and achieving excellent performance without requiring extensive preprocessing or feature engineering.',
-                metrics: {
-                    accuracy: '99.95',
-                    balancedAccuracy: '94.89',
-                    precision: '99.94',
-                    recall: '99.95',
-                    f1Score: '99.95',
-                    auc: '0.9998'
-                },
-                images: {
-                    confusionMatrix: '../model/tabnet/cm.png',
-                    rocCurve: null,
-                    accLoss: '../model/tabnet/acc_loss_epoch.png'
-                }
-            }
-        ];
-
-
-
-        async function fetchMetricsData(rfPath, xgbPath, tabPath) {
-                try {
-                    const [rfRes, xgbRes, tabRes] = await Promise.all([
-                        fetch(rfPath),
-                        fetch(xgbPath),
-                        fetch(tabPath),
-                    ]);
-
-                    if (!rfRes.ok || !xgbRes.ok || !tabRes.ok) {
-                        throw new Error('Failed to fetch one or more metrics files');
-                    }
-
-                    const [rfMetrics, xgbMetrics, tabMetrics] = await Promise.all([
-                        rfRes.json(),
-                        xgbRes.json(),
-                        tabRes.json(),
-                    ]);
-
-                    console.log(rfMetrics);
-                    console.log(tabMetrics);
-                    console.log(xgbMetrics);
-
-                    return { rfMetrics, xgbMetrics, tabMetrics };
-                } catch (error) {
-                    console.error('Error fetching JSON:', error);
-                    return null;
-                }
-            }
-
-            // Example usage:
-            fetchMetricsData('../model/RF/metric_results.json', '../model/xgb/metric_results.json', '../model/tabnet/metric_results.json');
-
-            // Function to generate model cards dynamically
-            function generateModelCards() {
-                const container = document.querySelector('.models-container');
-                container.innerHTML = '';
-
-                modelsData.forEach(model => {
-                    const modelCard = `
-            <div class="model-card collapsed" onclick="toggleCard(this)">
-                <div class="expand-indicator">▼</div>
-                <div class="model-header">
-                    <span class="model-name">${model.name}</span>
-                    <span class="model-type">${model.type}</span>
-                    <span class="status">${model.status}</span>
+    <div class="models-container">
+        {% for model in models %}
+        <div class="model-card collapsed" onclick="toggleCard(this)">
+            <div class="expand-indicator">▼</div>
+            <div class="model-header">
+                <span class="model-name">{{ model.name }}</span>
+                <span class="model-type">{{ model.type }}</span>
+                <span class="status">{{ model.status }}</span>
+            </div>
+            <span class="model-preview">Click to view performance metrics & details →</span>
+            <div class="model-details">
+                <div class="description">
+                    {{ model.description }}
                 </div>
-                <span class="model-preview">Click to view performance metrics & details →</span>
-                <div class="model-details">
-                    <div class="description">
-                        ${model.description}
-                    </div>
-                    
-                    <div class="metrics-container">
-                        <div class="metrics-title">Performance Metrics</div>
-                        <div class="metrics-grid">
+                
+                <div class="metrics-container">
+                    <div class="metrics-title">Performance Metrics</div>
+                    <div class="metrics-grid">
+                        {% if model.metrics %}
+                            {% if model.metrics.get('Accuracy') %}
                             <div class="metric-item">
                                 <div class="metric-label">Accuracy</div>
-                                <div class="metric-value">${model.metrics.accuracy}%</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Accuracy')|float * 100)) }}%</div>
                             </div>
+                            {% endif %}
+                            {% if model.metrics.get('Balanced accuracy') %}
                             <div class="metric-item">
                                 <div class="metric-label">Balanced Accuracy</div>
-                                <div class="metric-value">${model.metrics.balancedAccuracy}%</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Balanced accuracy')|float * 100)) }}%</div>
                             </div>
+                            {% endif %}
+                            {% if model.metrics.get('Precision') %}
                             <div class="metric-item">
                                 <div class="metric-label">Precision</div>
-                                <div class="metric-value">${model.metrics.precision}%</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Precision')|float * 100)) }}%</div>
                             </div>
+                            {% endif %}
+                            {% if model.metrics.get('Recall') %}
                             <div class="metric-item">
                                 <div class="metric-label">Recall</div>
-                                <div class="metric-value">${model.metrics.recall}%</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Recall')|float * 100)) }}%</div>
                             </div>
+                            {% endif %}
+                            {% if model.metrics.get('F1-Score') %}
                             <div class="metric-item">
                                 <div class="metric-label">F1-Score</div>
-                                <div class="metric-value">${model.metrics.f1Score}%</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('F1-Score')|float * 100)) }}%</div>
                             </div>
+                            {% endif %}
+                            {% if model.metrics.get('AUC') %}
                             <div class="metric-item">
                                 <div class="metric-label">AUC</div>
-                                <div class="metric-value">${model.metrics.auc}</div>
+                                <div class="metric-value">{{ "%.8f"|format(model.metrics.get('AUC')|float) }}</div>
                             </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="metric-item">
+                                <div class="metric-label">No Metrics Available</div>
+                                <div class="metric-value">-</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="features-container">
+                    <div class="metrics-title">Feature Importance</div>
+                    <div class="features-grid" id="{{ model.id }}-features">
+                        <div class="feature-item">
+                            <span class="feature-name">Feature importance data not available</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="features-container">
-                        <div class="metrics-title">Feature Importance</div>
-                        <div class="features-grid" id="${model.id}-features"></div>
-                    </div>
-
-                    <div class="graphs-container">
-                        <div class="metrics-title">Model Visualizations</div>
-                        <div class="graphs-grid">
-                            <div class="graph-item">
-                                <div class="graph-title">Confusion Matrix</div>
-                                <img src="${model.images.confusionMatrix}" alt="No Data"
-                                    style="width: 100%; height: auto; border-radius: 8px;">
-                            </div>
-                            <div class="graph-item">
-                                <div class="graph-title">ROC-AUC Curve</div>
-                                <img src="${model.images.rocCurve}" alt="No Data"
-                                    style="width: 100%; height: auto; border-radius: 8px;">
-                            </div>
-                            <div class="graph-item">
-                                <div class="graph-title">Accuaracy and loss Curve</div>
-                                <img src="${model.images.accLoss}" alt="No Data"
-                                    style="width: 1100px; height: auto; border-radius: 8px;">
-                            </div>
+                <div class="graphs-container">
+                    <div class="metrics-title">Model Visualizations</div>
+                    <div class="graphs-grid">
+                        <div class="graph-item">
+                            <div class="graph-title">Confusion Matrix</div>
+                            {% if model.images and model.images.confusionMatrix %}
+                            <img src="{{ model.images.confusionMatrix }}" alt="Confusion Matrix" 
+                                style="width: 100%; height: auto; border-radius: 8px;" 
+                                onerror="this.parentElement.innerHTML='<div class=\'graph-placeholder\'>No Data</div>'">
+                            {% else %}
+                            <div class="graph-placeholder">No Data</div>
+                            {% endif %}
+                        </div>
+                        <div class="graph-item">
+                            <div class="graph-title">ROC-AUC Curve</div>
+                            {% if model.images and model.images.rocCurve %}
+                            <img src="{{ model.images.rocCurve }}" alt="ROC Curve" 
+                                style="width: 100%; height: auto; border-radius: 8px;" 
+                                onerror="this.parentElement.innerHTML='<div class=\'graph-placeholder\'>No Data</div>'">
+                            {% else %}
+                            <div class="graph-placeholder">No Data</div>
+                            {% endif %}
+                        </div>
+                        <div class="graph-item">
+                            <div class="graph-title">Accuracy and Loss Curve</div>
+                            {% if model.images and model.images.accLoss %}
+                            <img src="{{ model.images.accLoss }}" alt="Accuracy Loss Curve" 
+                                style="width: 100%; height: auto; border-radius: 8px;" 
+                                onerror="this.parentElement.innerHTML='<div class=\'graph-placeholder\'>No Data</div>'">
+                            {% else %}
+                            <div class="graph-placeholder">No Data</div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-        `;
-                    container.insertAdjacentHTML('beforeend', modelCard);
-                });
-            }
+        </div>
+        {% endfor %}
+    </div>
 
-            // Call this function when the page loads
-            document.addEventListener('DOMContentLoaded', function () {
-                generateModelCards();
-            });
-            function populateFeatures(containerId) {
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = '';
-                    featureImportanceData.forEach(item => {
-                        const featureDiv = document.createElement('div');
-                        featureDiv.className = 'feature-item';
-                        featureDiv.innerHTML = `
-                        <span class="feature-name">${item.feature}</span>
-                        <span class="feature-importance">${(item.importance * 100).toFixed(2)}%</span>
-                    `;
-                        container.appendChild(featureDiv);
-                    });
+    <script>
+        function toggleCard(card) {
+            // Close all other cards
+            const allCards = document.querySelectorAll('.model-card');
+            allCards.forEach(otherCard => {
+                if (otherCard !== card && otherCard.classList.contains('expanded')) {
+                    otherCard.classList.remove('expanded');
+                    otherCard.classList.add('collapsed');
                 }
+            });
+
+            // Toggle the clicked card
+            if (card.classList.contains('collapsed')) {
+                card.classList.remove('collapsed');
+                card.classList.add('expanded');
+            } else {
+                card.classList.remove('expanded');
+                card.classList.add('collapsed');
             }
+        }
 
-
-
-            function toggleCard(card) {
-                // Close all other cards
-                const allCards = document.querySelectorAll('.model-card');
-                allCards.forEach(otherCard => {
-                    if (otherCard !== card && otherCard.classList.contains('expanded')) {
-                        otherCard.classList.remove('expanded');
-                        otherCard.classList.add('collapsed');
+        // Add keyboard support
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.model-card');
+            cards.forEach((card, index) => {
+                card.setAttribute('tabindex', '0');
+                card.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleCard(this);
                     }
                 });
-
-                // Toggle the clicked card
-                if (card.classList.contains('collapsed')) {
-                    card.classList.remove('collapsed');
-                    card.classList.add('expanded');
-
-                    // Populate features and create charts when card is expanded
-                    setTimeout(() => {
-                        if (card.querySelector('#rf-features')) {
-                            populateFeatures('rf-features');
-                        } else if (card.querySelector('#xgb-features')) {
-                            populateFeatures('xgb-features');
-                        } else if (card.querySelector('#tabnet-features')) {
-                            populateFeatures('tabnet-features');
-                        }
-                    }, 100);
-                } else {
-                    card.classList.remove('expanded');
-                    card.classList.add('collapsed');
-                }
-            }
-
-            // Add keyboard support
-            document.addEventListener('DOMContentLoaded', function () {
-                const cards = document.querySelectorAll('.model-card');
-                cards.forEach((card, index) => {
-                    card.setAttribute('tabindex', '0');
-                    card.addEventListener('keypress', function (e) {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            toggleCard(this);
-                        }
-                    });
-                });
             });
+        });
     </script>
 </body>
 

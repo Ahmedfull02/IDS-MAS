@@ -91,23 +91,25 @@
                 <th onclick="sortTable(5)">Dst IP</th>
                 <th onclick="sortTable(6)">Dst Port</th>
                 <th onclick="sortTable(7)">Protocol</th>
-                <th onclick="sortTable(8)">Status</th>
+                <th onclick="sortTable(8)">TabNet Prediction</th>
+                <th onclick="sortTable(9)">RF Prediction</th>
+                <th onclick="sortTable(10)">GB Prediction</th>
             </tr>
         </thead>
         <tbody>
             {% for result in results %}
-            <tr class="{{ 'benign' if result['Label'] == 'BENIGN' else 'non-benign' }}">
-                <td>{{ loop.index }}</td>
-                <td>{{ result['Timestamp'] }}</td>
-                <td>{{ result['Flow ID'] }}</td>
-                <td>{{ result['Src IP'] }}</td>
-                <td>{{ result['Src Port'] }}</td>
-                <td>{{ result['Dst IP'] }}</td>
-                <td>{{ result['Dst Port'] }}</td>
-                <td>{{ result['Protocol'] }}</td>
-                <td>{{ result['TABPred'] }}</td>
-                <td>{{ result['RFPred'] }}</td>
-                <td>{{ result['XGBPred'] }}</td>
+            <tr class="{{ 'benign' if result.get('Label') == 'BENIGN' else 'non-benign' }}">
+                <td>{{ result.get('id', 0)|int }}</td>
+                <td>{{ result.get('Timestamp', 'N/A') }}</td>
+                <td>{{ result.get('Flow ID', 'N/A') }}</td>
+                <td>{{ result.get('Src IP', 'N/A') }}</td>
+                <td>{{ result.get('Src Port', 'N/A') }}</td>
+                <td>{{ result.get('Dst IP', 'N/A') }}</td>
+                <td>{{ result.get('Dst Port', 'N/A') }}</td>
+                <td>{{ result.get('Protocol', 'N/A') }}</td>
+                <td>{{ result.get('TABPred', 'N/A') }}</td>
+                <td>{{ result.get('RFPred', 'N/A') }}</td>
+                <td>{{ result.get('GBPred', 'N/A') }}</td>
             </tr>
             {% endfor %}
         </tbody>

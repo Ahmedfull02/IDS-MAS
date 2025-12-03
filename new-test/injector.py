@@ -14,8 +14,7 @@ class InjectorAgent(Agent):
         def __init__(self, csv_file, period=1):
             super().__init__(period=period)
             self.data = pd.read_csv(csv_file)
-            sampled_df = self.data.groupby('Label', group_keys=False).apply(lambda x: x.sample(min(len(x), 1000)))
-            self.data = sampled_df
+            
             self.index = 0
 
         async def run(self):
@@ -26,14 +25,14 @@ class InjectorAgent(Agent):
                 row.update({'id':self.index})
                 msg.body = row.to_json()
                 await self.send(msg)
-                # print(f"Injected row {self.index}")
+                
+                print(f"[Injector] ✓ Row {self.index} injected and sent to Preprocessor")
                 self.index += 1
-                print('\n\n\nThis Row is Injected.\n\n\n')
             else:
-                print("All rows injected")
+                print(f"[Injector] All rows injected (total: {self.index})")
                 self.kill()
 
     async def setup(self):
-        b = self.InjectBehaviour("data/Friday.csv", period=5)
+        b = self.InjectBehaviour("data/Friday.csv", period=0.5)
         self.add_behaviour(b)  # Inject every 1 second
         print(f"\n\n\nInjectorAgent {self.jid} started\n\n\n")

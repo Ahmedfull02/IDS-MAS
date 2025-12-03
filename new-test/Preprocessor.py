@@ -34,9 +34,13 @@ class PreprocessorAgent(Agent):
                 if isinstance(data_json, str):
                     data_json = json.loads(data_json)
 
+                data_id = data_json.get("id", "N/A")
+                print(f"[Preprocessor] Received data for ID {data_id}")
+
                 cleaned_data = self.cleanAgent(data=data_json, cols_file=self.cols_file)
                 # print('\n\n\n\n\n\n')
                 # print("Cleaned data:", cleaned_data)
+                print(f"[Preprocessor] Data cleaned for ID {data_id}")
 
                 data_pd = pd.DataFrame([cleaned_data])
 
@@ -45,6 +49,7 @@ class PreprocessorAgent(Agent):
                 # print("Encoded data:", encoded_data)
                 # print('data type after encoding:', type(encoded_data))
                 # print('\n\n\n\n\n\n')
+                print(f"[Preprocessor] Data encoded for ID {data_id}")
 
                 # Add Timestamp for dashboard presentation
                 now = dt.datetime.now()
@@ -53,27 +58,26 @@ class PreprocessorAgent(Agent):
                 # Prepare data to send to Analyzer agent
                 data = json.dumps({0: data_json, 1: encoded_data})
                 
-                # Send data to Dashboard
-                # new_msg = Message(to=AGENT6)
-                # new_msg.body = data
-                
                 # Send data to Analyzer1
-                new_msg = Message(to=AGENT3)
-                new_msg.body = data
+                new_msg1 = Message(to=AGENT3)
+                new_msg1.body = data
                 
-                await self.send(new_msg)
+                await self.send(new_msg1)
+                print(f"[Preprocessor] ✓ Data sent to TabAnalyzer (ID: {data_id})")
                 
                 # Send data to Analyzer2
-                new_msg = Message(to=AGENT4)
-                new_msg.body = data
+                new_msg2 = Message(to=AGENT4)
+                new_msg2.body = data
                 
-                await self.send(new_msg)
+                await self.send(new_msg2)
+                print(f"[Preprocessor] ✓ Data sent to RFAnalyzer (ID: {data_id})")
                 
-                # Send data to Analyzer1
-                new_msg = Message(to=AGENT5)
-                new_msg.body = data
+                # Send data to Analyzer3
+                new_msg3 = Message(to=AGENT5)
+                new_msg3.body = data
                 
-                await self.send(new_msg)
+                await self.send(new_msg3)
+                print(f"[Preprocessor] ✓ Data sent to XGBAnalyzer (ID: {data_id})")
 
         def cleanAgent(self, data, cols_file):
             # Assuming your data is in a DataFrame called df
