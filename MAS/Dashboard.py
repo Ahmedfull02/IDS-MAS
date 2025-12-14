@@ -23,7 +23,7 @@ class DashboardAgent(Agent):
     MODELS = []
     class DashboardBehaviour(CyclicBehaviour):
         async def run(self):
-            msg = await self.receive(timeout=10)
+            msg = await self.receive(timeout=2)
             if msg:
                 data = json.loads(msg.body) if msg.body is not None else {}
                 # print(data, "In dashboard")
