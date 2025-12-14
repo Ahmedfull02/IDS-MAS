@@ -1,0 +1,59 @@
+Src Port
+Dst Port
+Protocol
+Flow Duration
+Total Fwd Packet
+Total Bwd packets
+Total Length of Fwd Packet
+Total Length of Bwd Packet
+Fwd Packet Length Max
+Fwd Packet Length Min
+Fwd Packet Length Mean
+Fwd Packet Length Std
+Bwd Packet Length Max
+Bwd Packet Length Min
+Bwd Packet Length Mean
+Bwd Packet Length Std
+Flow Bytes/s
+Flow Packets/s
+Flow IAT Mean
+Flow IAT Std
+Flow IAT Min
+Fwd IAT Std
+Bwd IAT Std
+Fwd PSH Flags
+Bwd URG Flags
+Fwd RST Flags
+Bwd RST Flags
+Fwd Header Length
+Bwd Header Length
+Bwd Packets/s
+Packet Length Min
+FIN Flag Count
+SYN Flag Count
+RST Flag Count
+PSH Flag Count
+ACK Flag Count
+URG Flag Count
+CWR Flag Count
+ECE Flag Count
+Down/Up Ratio
+Fwd Bytes/Bulk Avg
+Fwd Packet/Bulk Avg
+Fwd Bulk Rate Avg
+Bwd Bulk Rate Avg
+Subflow Fwd Packets
+Subflow Fwd Bytes
+Subflow Bwd Packets
+Subflow Bwd Bytes
+FWD Init Win Bytes
+Bwd Init Win Bytes
+Fwd Act Data Pkts
+Fwd Seg Size Min
+Active Mean
+Active Std
+Active Max
+Active Min
+ICMP Code
+ICMP Type
+Total TCP Flow Time

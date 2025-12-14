@@ -1,0 +1,28 @@
+epoch 0  | loss: 0.29279 | val_0_balanced_accuracy: 0.58637 | val_0_accuracy: 0.98394 |  0:02:14s
+epoch 1  | loss: 0.05049 | val_0_balanced_accuracy: 0.84032 | val_0_accuracy: 0.9924  |  0:04:26s
+epoch 2  | loss: 0.02887 | val_0_balanced_accuracy: 0.90239 | val_0_accuracy: 0.99577 |  0:07:08s
+epoch 3  | loss: 0.02054 | val_0_balanced_accuracy: 0.95583 | val_0_accuracy: 0.9967  |  0:09:39s
+epoch 4  | loss: 0.01547 | val_0_balanced_accuracy: 0.98347 | val_0_accuracy: 0.99763 |  0:12:23s
+epoch 5  | loss: 0.01272 | val_0_balanced_accuracy: 0.97749 | val_0_accuracy: 0.99789 |  0:14:56s
+epoch 6  | loss: 0.01143 | val_0_balanced_accuracy: 0.98653 | val_0_accuracy: 0.99805 |  0:17:19s
+epoch 7  | loss: 0.0099  | val_0_balanced_accuracy: 0.98667 | val_0_accuracy: 0.99817 |  0:19:53s
+epoch 8  | loss: 0.00903 | val_0_balanced_accuracy: 0.98631 | val_0_accuracy: 0.99815 |  0:22:15s
+epoch 9  | loss: 0.00846 | val_0_balanced_accuracy: 0.98555 | val_0_accuracy: 0.99809 |  0:24:56s
+epoch 10 | loss: 0.00786 | val_0_balanced_accuracy: 0.98535 | val_0_accuracy: 0.99833 |  0:27:17s
+epoch 11 | loss: 0.00743 | val_0_balanced_accuracy: 0.98656 | val_0_accuracy: 0.99868 |  0:29:42s
+epoch 12 | loss: 0.00723 | val_0_balanced_accuracy: 0.98685 | val_0_accuracy: 0.9987  |  0:32:14s
+epoch 13 | loss: 0.00665 | val_0_balanced_accuracy: 0.98652 | val_0_accuracy: 0.99841 |  0:34:34s
+epoch 14 | loss: 0.00644 | val_0_balanced_accuracy: 0.98699 | val_0_accuracy: 0.99875 |  0:37:07s
+epoch 15 | loss: 0.00637 | val_0_balanced_accuracy: 0.98671 | val_0_accuracy: 0.99878 |  0:39:21s
+epoch 16 | loss: 0.00608 | val_0_balanced_accuracy: 0.98695 | val_0_accuracy: 0.99862 |  0:41:36s
+epoch 17 | loss: 0.00589 | val_0_balanced_accuracy: 0.98713 | val_0_accuracy: 0.99882 |  0:44:22s
+epoch 18 | loss: 0.00582 | val_0_balanced_accuracy: 0.98717 | val_0_accuracy: 0.99887 |  0:46:56s
+epoch 19 | loss: 0.00562 | val_0_balanced_accuracy: 0.99057 | val_0_accuracy: 0.99882 |  0:49:23s
+epoch 20 | loss: 0.00549 | val_0_balanced_accuracy: 0.99428 | val_0_accuracy: 0.99899 |  0:51:50s
+epoch 21 | loss: 0.00518 | val_0_balanced_accuracy: 0.98679 | val_0_accuracy: 0.99874 |  0:54:33s
+epoch 22 | loss: 0.00529 | val_0_balanced_accuracy: 0.99414 | val_0_accuracy: 0.99885 |  0:57:07s
+epoch 23 | loss: 0.00498 | val_0_balanced_accuracy: 0.99408 | val_0_accuracy: 0.99879 |  0:59:28s
+epoch 24 | loss: 0.00477 | val_0_balanced_accuracy: 0.99466 | val_0_accuracy: 0.99883 |  1:02:07s
+epoch 25 | loss: 0.00461 | val_0_balanced_accuracy: 0.99627 | val_0_accuracy: 0.99876 |  1:04:39s
+
+Early stopping occurred at epoch 25 with best_epoch = 20 and best_val_0_accuracy = 0.99899

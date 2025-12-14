@@ -1,0 +1,1 @@
+{"Accuracy": "0.999055", "Balanced accuracy": " 0.987841", "Precision": "0.999056", "Recall": "0.999055", "log loss": "0.003774", "F1-Score": "0.999054", "AUC": "0.9999405192"}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intrusion Detection List</title>
+    <style>
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        header img {
+            height: 50px;
+        }
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-left: 1rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: #555;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+            cursor: pointer;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .benign {
+            background-color: #e0ffe0;
+        }
+        .non-benign {
+            background-color: #ffe0e0;
+        }
+        .search-bar {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-input {
+            padding: 8px;
+            width: 50%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<header>
+        <a href="/dashboard">
+            <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
+        </a>
+        <nav>
+            <a href="/models">Models</a>
+            <a href="/list">Logs</a>
+        </nav>
+    </header>
+<body>   
+    <h1 align="center">List of traffic</h1>
+    <div class="search-bar">
+        <input type="text" id="search" class="search-input" onkeyup="filterTable()" placeholder="Search for data...">
+    </div>
+    <table id="dashboard">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Row Number</th>
+                <th onclick="sortTable(1)">Timestamp</th>
+                <th onclick="sortTable(2)">Flow ID</th>
+                <th onclick="sortTable(3)">Src IP</th>
+                <th onclick="sortTable(4)">Src Port</th>
+                <th onclick="sortTable(5)">Dst IP</th>
+                <th onclick="sortTable(6)">Dst Port</th>
+                <th onclick="sortTable(7)">Protocol</th>
+                <th onclick="sortTable(8)">TabNet Prediction</th>
+                <th onclick="sortTable(9)">RF Prediction</th>
+                <th onclick="sortTable(10)">GB Prediction</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr class="{{ 'benign' if result.get('Label') == 'BENIGN' else 'non-benign' }}">
+                <td>{{ result.get('id', 0)|int }}</td>
+                <td>{{ result.get('Timestamp', 'N/A') }}</td>
+                <td>{{ result.get('Flow ID', 'N/A') }}</td>
+                <td>{{ result.get('Src IP', 'N/A') }}</td>
+                <td>{{ result.get('Src Port', 'N/A') }}</td>
+                <td>{{ result.get('Dst IP', 'N/A') }}</td>
+                <td>{{ result.get('Dst Port', 'N/A') }}</td>
+                <td>{{ result.get('Protocol', 'N/A') }}</td>
+                <td>{{ result.get('TABPred', 'N/A') }}</td>
+                <td>{{ result.get('RFPred', 'N/A') }}</td>
+                <td>{{ result.get('GBPred', 'N/A') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function filterTable() {
+            const input = document.getElementById('search');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('dashboard');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                const row = tr[i];
+                const textContent = row.textContent || row.innerText;
+
+                if (textContent.toLowerCase().indexOf(filter) > -1) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        }
+
+        function sortTable(n) {
+        const table = document.getElementById('dashboard');
+        let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        switching = true;
+        dir = "asc"; 
+
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                if (dir == "asc") {
+                    if (n === 0) {  // Numeric sort for "Row Number"
+                        if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                } else if (dir == "desc") {
+                    if (n === 0) {  // Numeric sort for "Row Number"
+                        if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;      
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+    setTimeout(function() {
+        window.location.reload();
+    }, 20000); // 5 Secondes
+    </script>
+</body>
+</html>
