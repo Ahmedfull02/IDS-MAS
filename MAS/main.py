@@ -36,28 +36,6 @@ async def main():
     await analyzer3.start(auto_register=True)
     await collector.start(auto_register=True)
     await dashboard.start(auto_register=True)
-
-    # print("--- Starting Web Interfaces ---")
-    
-    # await injector.web.start(hostname="127.0.0.1", port=10000)
-    # await preprocessor.web.start(hostname="127.0.0.1", port=10001)
-    # await analyzer1.web.start(hostname="127.0.0.1", port=10002)
-    # await analyzer2.web.start(hostname="127.0.0.1", port=10003)
-    # await analyzer3.web.start(hostname="127.0.0.1", port=10004)
-    # await collector.web.start(hostname="127.0.0.1", port=10005)
-    # await dashboard.web.start(hostname="127.0.0.1", port=10006)
-
-    # print("\nAll Agents Running. Access Dashboards here:")
-    # print(f"Injector:     http://127.0.0.1:10000")
-    # print(f"Preprocessor: http://127.0.0.1:10001")
-    # print(f"Analyzer1:    http://127.0.0.1:10002")
-    # print(f"Analyzer2:    http://127.0.0.1:10003")
-    # print(f"Analyzer3:    http://127.0.0.1:10004")
-    # print(f"Collector:    http://127.0.0.1:10005")
-    # print(f"Dashboard:    http://127.0.0.1:10006")
-    # print("\nPress Ctrl+C to stop the system.")
-
-    # 4. Keep the script running
     try:
         while True:
             await asyncio.sleep(1)
