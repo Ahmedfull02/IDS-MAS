@@ -53,7 +53,7 @@ This guide details how to set up the development environment and install the nec
 
 Before installing the requirements, ensure you have the following installed on your system:
 
-- **Python 3.8** or higher
+- **Python 3.11** is a must.
 - **pip** (Python Package Installer)
 - **Git**
 
