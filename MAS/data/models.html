@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Models Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        header img {
+            height: 50px;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-left: 1rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #555;
+        }
+
+        .models-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .model-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            width: 450px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card.collapsed {
+            height: auto;
+            max-height: 150px;
+        }
+
+        .model-card.expanded {
+            max-height: none;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .model-card:hover {
+            box-shadow: 0 8px 24px rgba(80, 105, 150, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .model-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .model-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #354052;
+        }
+
+        .model-type {
+            margin-left: 12px;
+            font-size: 0.9rem;
+            color: #7686a0;
+            font-weight: 500;
+            padding: 4px 12px;
+            background: #f0f4f8;
+            border-radius: 6px;
+        }
+
+        .status {
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #137333;
+            background: #e6f4ea;
+        }
+
+        .model-details {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .model-card.expanded .model-details {
+            opacity: 1;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .description {
+            color: #535f76;
+            margin: 12px 0;
+            line-height: 1.6;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .metrics-container {
+            margin: 20px 0;
+        }
+
+        .metrics-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #354052;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .metric-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .features-container {
+            margin: 20px 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .feature-name {
+            font-size: 0.9rem;
+            color: #354052;
+        }
+
+        .feature-importance {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .graphs-container {
+            margin: 20px 0;
+        }
+
+        .graphs-grid {
+            display: list-item;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .graph-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .graph-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #354052;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .graph-placeholder {
+            width: 100%;
+            height: 300px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7686a0;
+            font-size: 1.1rem;
+        }
+
+        .expand-indicator {
+            position: absolute;
+            right: 24px;
+            top: 24px;
+            color: #7686a0;
+            transition: transform 0.3s;
+        }
+
+        .model-card.expanded .expand-indicator {
+            transform: rotate(180deg);
+        }
+
+        .model-preview {
+            color: #7686a0;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .model-card.expanded .model-preview {
+            display: none;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .feature-chart-container {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .feature-chart-container canvas {
+            display: block;
+            width: 100% !important;  /* lets it fill the container */
+        }
+        .feature-cards {
+        max-height: 180px;      /* adjust as needed */
+        overflow-y: auto;       /* vertical scroll if cards exceed this height */
+        padding-right: 4px;     /* room for scrollbar */
+        }
+        .feature-chart-container {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #354052;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        .feature-chart-container canvas {
+            display: block;
+            width: 100% ;
+            height: auto ;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="/dashboard">
+            <img src="https://images.seeklogo.com/logo-png/6/1/ids-logo-png_seeklogo-69927.png" alt="IDS Logo">
+        </a>
+        <nav>
+            <a href="/models">Models</a>
+            <a href="/list">Logs</a>
+        </nav>
+    </header>
+
+    <div class="models-container">
+        {% for model in models %}
+        <div class="model-card collapsed" onclick="toggleCard(this)">
+            <div class="expand-indicator">▼</div>
+            <div class="model-header">
+                <span class="model-name">{{ model.name }}</span>
+                <span class="model-type">{{ model.type }}</span>
+                <!-- <span class="status">{{ model.status }}</span> -->
+            </div>
+            <span class="model-preview">Click to view performance metrics & details →</span>
+            <div class="model-details">
+                <div class="description">
+                    {{ model.description }}
+                </div>
+                
+                <div class="metrics-container">
+                    <div class="metrics-title">Performance Metrics</div>
+                    <div class="metrics-grid">
+                        {% if model.metrics %}
+                            {% if model.metrics.get('Accuracy') %}
+                            <div class="metric-item">
+                                <div class="metric-label">Accuracy</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Accuracy')|float * 100)) }}%</div>
+                            </div>
+                            {% endif %}
+                            {% if model.metrics.get('Balanced accuracy') %}
+                            <div class="metric-item">
+                                <div class="metric-label">Balanced Accuracy</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Balanced accuracy')|float * 100)) }}%</div>
+                            </div>
+                            {% endif %}
+                            {% if model.metrics.get('Precision') %}
+                            <div class="metric-item">
+                                <div class="metric-label">Precision</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Precision')|float * 100)) }}%</div>
+                            </div>
+                            {% endif %}
+                            {% if model.metrics.get('Recall') %}
+                            <div class="metric-item">
+                                <div class="metric-label">Recall</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('Recall')|float * 100)) }}%</div>
+                            </div>
+                            {% endif %}
+                            {% if model.metrics.get('F1-Score') %}
+                            <div class="metric-item">
+                                <div class="metric-label">F1-Score</div>
+                                <div class="metric-value">{{ "%.8f"|format((model.metrics.get('F1-Score')|float * 100)) }}%</div>
+                            </div>
+                            {% endif %}
+                            {% if model.metrics.get('AUC') %}
+                            <div class="metric-item">
+                                <div class="metric-label">AUC</div>
+                                <div class="metric-value">{{ "%.8f"|format(model.metrics.get('AUC')|float) }}</div>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="metric-item">
+                                <div class="metric-label">No Metrics Available</div>
+                                <div class="metric-value">-</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="features-container">
+                    <div class="metrics-title">Feature Importance</div>
+                        <div class="features-grid" id="{{ model.id }}-feat_importance">
+                            {% if model.feat_importance %}
+                                {% for feature, importance in model.feat_importance.items() %}
+                                <div class="feature-item">
+                                    <div class="feature-name">{{ feature }}</div>
+                                    <div class="feature-value">{{ "%.8f"|format(importance|float * 100) }}%</div>
+                                </div>          
+                                {% endfor %}
+                            {% else %}
+                                <div class="feature-item">
+                                    <span class="feature-name">Feature importance data not available</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <input type="hidden"
+                            id="{{ model.id }}-featImportance"
+                            value='{{ model.feat_importance | tojson | safe }}'>
+
+                        <!-- Canvas chart (separate container, full width) -->
+                        <div class="feature-chart-container" id="{{ model.id }}-feat_importance-chart">Feature Importance Graph</div>
+                        <canvas id="{{ model.id }}-featChart"
+                                width="1400"
+                                height="{{ (model.feat_importance | length if model.feat_importance else 0) * 35 + 60 }}">
+                        </canvas>
+                </div>
+
+                <div class="graphs-container">
+                    <div class="metrics-title">Model Visualizations</div>
+                    <div class="graphs-grid">
+                        <div class="graph-item">
+                            <div class="graph-title">Confusion Matrix</div>
+                            {% if model.images and model.images.confusionMatrix %}
+                            <img src="{{ model.images.confusionMatrix }}" alt="Confusion Matrix" 
+                                style="width: 100%; height: auto; border-radius: 8px;" 
+                                onerror="this.parentElement.innerHTML='<div class=\'graph-placeholder\'>No Data</div>'">
+                            {% else %}
+                            <div class="graph-placeholder">No Data</div>
+                            {% endif %}
+                        </div>
+                        <div class="graph-item">
+                            <div class="graph-title">Accuracy and Loss Curve</div>
+                            {% if model.images and model.images.accLoss %}
+                            <img src="{{ model.images.accLoss }}" alt="Accuracy Loss Curve" 
+                                style="width: 100%; height: auto; border-radius: 8px;" 
+                                onerror="this.parentElement.innerHTML='<div class=\'graph-placeholder\'>No Data</div>'">
+                            {% else %}
+                            <div class="graph-placeholder">No Data</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleCard(card) {
+            // Close all other cards
+            const allCards = document.querySelectorAll('.model-card');
+            allCards.forEach(otherCard => {
+                if (otherCard !== card && otherCard.classList.contains('expanded')) {
+                    otherCard.classList.remove('expanded');
+                    otherCard.classList.add('collapsed');
+                }
+            });
+
+            // Toggle the clicked card
+            if (card.classList.contains('collapsed')) {
+                card.classList.remove('collapsed');
+                card.classList.add('expanded');
+            } else {
+                card.classList.remove('expanded');
+                card.classList.add('collapsed');
+            }
+        }
+
+        // Add keyboard support
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.model-card');
+            cards.forEach((card, index) => {
+                card.setAttribute('tabindex', '0');
+                card.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleCard(this);
+                    }
+                });
+            });
+        });
+
+        /*feature iùmportance graph*/
+        document.addEventListener("DOMContentLoaded", function () {
+        // Function to draw feature importance chart
+        function drawFeatureImportanceChart(modelId) {
+            const hiddenInput = document.getElementById(modelId + '-featImportance');
+            const canvas = document.getElementById(modelId + '-featChart');
+            
+            if (!hiddenInput || !canvas) {
+                console.warn(`Elements not found for model: ${modelId}`);
+                return;
+            }
+
+            // Parse the JSON data
+            const featureImportance = JSON.parse(hiddenInput.value);
+            
+            // Convert to array, sort by importance (descending), take top 10
+            const features = Object.entries(featureImportance)
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 10); // Top 10 only
+
+            if (features.length === 0) {
+                canvas.style.display = 'none';
+                return;
+            }
+
+            // Canvas setup
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const margin = { top: 20, right: 120, bottom: 30, left: 220 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Max importance for scaling bars
+            const maxImp = features[0].value;
+
+            // Draw each feature bar
+            features.forEach((d, i) => {
+                const y = margin.top + i * 35;
+
+                // === Y-axis: Feature Name ===
+                ctx.fillStyle = '#1a1a1a';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'end';
+                ctx.fillText(d.name, margin.left - 15, y + 12);
+
+                // === Bar Background (light gray) ===
+                const barX = margin.left;
+                const barY = y - 10;
+                const barHeight = 20;
+                ctx.fillStyle = '#ecf0f1';
+                ctx.fillRect(barX, barY, chartWidth, barHeight);
+
+                // === Bar Fill (blue) ===
+                const barLength = (d.value / maxImp) * chartWidth;
+                ctx.fillStyle = '#3498db';
+                ctx.fillRect(barX, barY, barLength, barHeight);
+
+                // === Bar Border ===
+                ctx.strokeStyle = '#bdc3c7';
+                ctx.strokeRect(barX, barY, chartWidth, barHeight);
+
+                // === X-axis: Value Label (percentage) ===
+                ctx.fillStyle = '#2c3e50';
+                ctx.textAlign = 'start';
+                ctx.fillText((d.value * 100).toFixed(4) + '%', barX + barLength + 5, y + 12);
+            });
+
+            // === Chart Title ===
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '24px sans-serif';
+            ctx.textAlign = 'center';
+        }
+
+        // === Draw charts for each model ===
+        // Example: Assuming you have model IDs like 'rf', 'gb', 'tab'
+        drawFeatureImportanceChart('rf');
+        drawFeatureImportanceChart('gb');
+        drawFeatureImportanceChart('tabnet');
+    });
+
+    </script>
+</body>
+
+</html>

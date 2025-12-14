@@ -1,85 +1,53 @@
 import asyncio
+import sys
 from spade.agent import Agent
-from spade.behaviour import OneShotBehaviour, CyclicBehaviour
-from spade.message import Message
+from spade.behaviour import CyclicBehaviour
 
-# Agent 1: Initiator
-class Agent1(Agent):
-    class SendBehaviour(CyclicBehaviour):
+class MyAgent(Agent):
+    class MyBehaviour(CyclicBehaviour):
         async def run(self):
-            print("Agent1: Sending message to Agent2")
-            msg = Message(to="agent2@localhost")
-            msg.set_metadata("performative", "inform")
-            msg.body = "Hello from Agent1!"
-            await self.send(msg)
-            print("Agent1: Message sent!")
+            print("[Agent] I am alive and running...")
+            # This sleep simulates work being done
+            await asyncio.sleep(3)
 
     async def setup(self):
-        print("Agent1 started")
-        b = self.SendBehaviour()
+        print("Agent starting . . .")
+        
+        # 1. Start the built-in web dashboard on port 10000
+        await self.web.start(port=10000)
+        print("Web dashboard enabled: http://localhost:10000")
+        
+        # 2. Add the behavior
+        b = self.MyBehaviour()
         self.add_behaviour(b)
 
-# Agent 2: Middleman
-class Agent2(Agent):
-    class ReceiveAndForwardBehaviour(CyclicBehaviour):
-        async def run(self):
-            print("Agent2: Waiting for message...")
-            msg = await self.receive(timeout=10)
-            if msg:
-                print(f"Agent2: Received: {msg.body}")
-                print("Agent2: Forwarding to Agent3")
-                
-                forward_msg = Message(to="agent3@localhost")
-                forward_msg.set_metadata("performative", "inform")
-                forward_msg.body = f"Agent2 forwarding: {msg.body}"
-                await self.send(forward_msg)
-                print("Agent2: Message forwarded!")
-
-    async def setup(self):
-        print("Agent2 started")
-        b = self.ReceiveAndForwardBehaviour()
-        self.add_behaviour(b)
-
-# Agent 3: Receiver
-class Agent3(Agent):
-    class ReceiveBehaviour(OneShotBehaviour):
-        async def run(self):
-            print("Agent3: Waiting for message...")
-            msg = await self.receive(timeout=10)
-            if msg:
-                print(f"Agent3: Received: {msg.body}")
-                print("Agent3: Task completed!")
-
-    async def setup(self):
-        print("Agent3 started")
-        b = self.ReceiveBehaviour()
-        self.add_behaviour(b)
-
-# Main execution
 async def main():
-    # Create agents with JID and password
-    agent1 = Agent1("agent1@localhost", "1")
-    agent2 = Agent2("agent2@localhost", "2")
-    agent3 = Agent3("agent3@localhost", "3")
+    # --- ENTER REAL CREDENTIALS HERE ---
+    JID = "admin@localhost"
+    PASSWORD = "admin"
 
-    # Start all agents
-    await agent1.start()
-    await agent2.start()
-    await agent3.start()
-    agent1.web.start(hostname="127.0.0.1", port="10000")
-    agent2.web.start(hostname="127.0.0.2", port="10000")
-    agent3.web.start(hostname="127.0.0.3", port="10000")
+    if JID == "your_username@xmpp.server":
+        print("ERROR: Please update the JID and PASSWORD with real XMPP credentials.")
+        return
 
-    print("All agents started. Waiting for communication...")
+    # Create the agent
+    dummy_agent = MyAgent(JID, PASSWORD)
     
-    # Wait for agents to complete their tasks
-    await asyncio.sleep(5)
+    # Start the agent
+    await dummy_agent.start()
+    print("Agent started. Press Ctrl+C to quit.")
 
-    # # Stop all agents
-    # await agent1.stop()
-    # await agent2.stop()
-    # await agent3.stop()
-    print("All agents stopped")
+    # Keep the script running so the agent stays alive
+    try:
+        while True:
+            await asyncio.sleep(1)
+    except KeyboardInterrupt:
+        print("Stopping agent...")
+        await dummy_agent.stop()
 
 if __name__ == "__main__":
+    # Windows fix for Python 3.8+
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        
     asyncio.run(main())
