@@ -56,6 +56,22 @@ Before installing the requirements, ensure you have the following installed on y
 - **Python 3.11** is a must.
 - **pip** (Python Package Installer)
 - **Git**
+- **Ignite OpenFIre** (needs java)
+
+### 0. Install openfire
+ - Log in using the default credentials (`admin`/`admin`).
+   - Click on the "Users" tab in the console.
+   - Click on the "Create User" button.
+   - Fill in the required fields, such as username, password, and email address.
+   - Repeat this process for each user specified in the code:
+     - `AGENT1`: ["agent1@localhost", "1"]
+     - `AGENT2`: ["agent2@localhost", "2"]
+     - `AGENT3`: ["agent3@localhost", "3"]
+     - `AGENT4`: ["agent4@localhost", "4"]
+     - `AGENT5`: ["agent5@localhost", "5"]
+     - `AGENT6`: ["agent6@localhost", "6"]
+     - `AGENT7`: ["agent7@localhost", "7"]
+   - After creating the users, make sure to note down the usernames and passwords for each user.
 
 You can verify your Python version by running:
 ```bash

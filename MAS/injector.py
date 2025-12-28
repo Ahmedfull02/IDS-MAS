@@ -14,7 +14,7 @@ class InjectorAgent(Agent):
         def __init__(self, csv_file, period=1):
             super().__init__(period=period)
             self.data = pd.read_csv(csv_file)
-            
+            self.data = self.data.sample(frac=1).reset_index(drop=True)  # Shuffle data
             self.index = 0
 
         async def run(self):
